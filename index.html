@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS IAM Policy Builder</title>
+</head>
+<body>
+    <h1>AWS IAM Policy Builder</h1>
+    
+    <form action="/generate_policy" method="POST">
+        <label for="service">Choose Service:</label>
+        <select name="service" id="service" onchange="updateActions()">
+            <option value="S3">S3</option>
+            <option value="EC2">EC2</option>
+        </select>
+        <br>
+
+        <label for="actions">Select Actions:</label><br>
+        <div id="actions-container">
+            <!-- Actions will be populated here -->
+        </div>
+        <br>
+
+        <label for="resource">Enter Resource ARN:</label>
+        <input type="text" id="resource" name="resource" required>
+        <br>
+
+        <label for="condition">Enter Condition (IP):</label>
+        <input type="text" id="condition" name="condition">
+        <br>
+
+        <button type="submit">Generate Policy</button>
+    </form>
+
+    <hr>
+
+    <h2>Generated IAM Policy (JSON):</h2>
+    <pre id="policy-json"></pre>
+
+    <script>
+        const awsActions = {{ aws_actions|tojson }};
+        let currentService = 'S3';
+
+        function updateActions() {
+            currentService = document.getElementById('service').value;
+            const actionsContainer = document.getElementById('actions-container');
+            actionsContainer.innerHTML = ''; // Clear current actions
+
+            const actions = awsActions[currentService];
+            actions.forEach(action => {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'actions';
+                checkbox.value = action;
+                const label = document.createElement('label');
+                label.textContent = action;
+                actionsContainer.appendChild(checkbox);
+                actionsContainer.appendChild(label);
+                actionsContainer.appendChild(document.createElement('br'));
+            });
+        }
+
+        // Initial actions update
+        updateActions();
+    </script>
+</body>
+</html>
